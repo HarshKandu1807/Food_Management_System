@@ -15,11 +15,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Food_Management_System.Application\Food_Management_System.Application.csproj" />
     <ProjectReference Include="..\Food_Management_System.Infrastructure\Food_Management_System.Infrastructure.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Controllers\" />
   </ItemGroup>
 
 </Project>

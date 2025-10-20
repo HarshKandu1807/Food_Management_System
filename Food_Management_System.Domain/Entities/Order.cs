@@ -1,4 +1,6 @@
-﻿namespace Food_Management_System.Domain.Entities
+﻿using System.Text.Json.Serialization;
+
+namespace Food_Management_System.Domain.Entities
 {
     public class Order:BaseEntity
     {
@@ -6,6 +8,7 @@
         public DateTime OrderDate { get; set; }
         public double TotalAmount { get; set; }
         public User? User { get; set; }
+        [JsonIgnore]
         public ICollection<OrderDetail>? OrderDetails { get; set; }
     }
 }

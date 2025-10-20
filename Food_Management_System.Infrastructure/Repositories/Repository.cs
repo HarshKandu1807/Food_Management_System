@@ -1,5 +1,6 @@
 ﻿using Food_Management_System.Domain.Entities;
 using Food_Management_System.Domain.Interfaces;
+using Food_Management_System.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;

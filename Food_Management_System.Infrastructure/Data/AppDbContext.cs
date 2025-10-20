@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Food_Management_System.Infrastructure
+namespace Food_Management_System.Infrastructure.Data
 {
     public class AppDbContext : DbContext
     {

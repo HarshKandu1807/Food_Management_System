@@ -1,4 +1,7 @@
+using Food_Management_System.Application.Mapping;
+using Food_Management_System.Application.Services;
 using Food_Management_System.Infrastructure;
+using Food_Management_System.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 
 
@@ -10,6 +13,10 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddInfrastructure();
+builder.Services.AddScoped(typeof(IBaseService<>), typeof(BaseService<>));
+builder.Services.AddAutoMapper(typeof(MappingProfile));
 
 var app = builder.Build();
 

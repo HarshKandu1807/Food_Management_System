@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace Food_Management_System.Domain.Entities
 {
@@ -6,9 +7,9 @@ namespace Food_Management_System.Domain.Entities
     {
         public string Name { get; set; }
         public string Password { get; set; }
-        [MaxLength(10)]
         public int ContactNo { get; set; }
         public string Role { get; set; }
+        [JsonIgnore]
         public ICollection<Order>? Orders { get; set; }
     }
 }
