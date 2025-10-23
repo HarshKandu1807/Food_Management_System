@@ -1,6 +1,7 @@
 ﻿using Food_Management_System.Domain.Entities;
 using Food_Management_System.Domain.Interfaces;
 using Food_Management_System.Infrastructure.Data;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -13,23 +14,21 @@ namespace Food_Management_System.Infrastructure.Repositories
     public class UnitOfWork:IUnitOfWork
     {
         private readonly AppDbContext context;
-        private readonly ConcurrentDictionary<Type, object> _repositories = new();
-
-        public UnitOfWork(AppDbContext _context)
+        public IUserRepository UserRepository { get; }
+        public IMenuRepository MenuRepository { get; }
+        public IOrderRepository OrderRepository { get; }
+        public IInventoryRepository InventoryRepository { get; }
+        public IRecipeRepository RecipeRepository { get; }
+        public UnitOfWork(AppDbContext _context, IUserRepository _UserRepository,IMenuRepository _MenuRepository, 
+            IOrderRepository _OrderRepository, IInventoryRepository _InventoryRepository, IRecipeRepository _RecipeRepository)
         {
             context = _context;
+            UserRepository = _UserRepository;
+            MenuRepository = _MenuRepository;
+            OrderRepository = _OrderRepository;
+            InventoryRepository = _InventoryRepository;
+            RecipeRepository = _RecipeRepository;
         }
-
-        public IRepository<T> Repository<T>() where T : BaseEntity
-        {
-            if (_repositories.TryGetValue(typeof(T), out var repo))
-                return (IRepository<T>)repo;
-
-            var newRepo = new Repository<T>(context);
-            _repositories[typeof(T)] = newRepo;
-            return newRepo;
-        }
-
         public async Task<int> SaveChangesAsync()
         {
             return await context.SaveChangesAsync();

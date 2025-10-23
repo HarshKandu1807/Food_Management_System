@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Food_Management_System.Application.DTOS;
 using Food_Management_System.Application.Services;
+using Food_Management_System.Application.Services.UserService;
 using Food_Management_System.Domain.Entities;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -11,9 +12,9 @@ namespace Food_Management_System.Controllers
     [ApiController]
     public class UserController : ControllerBase
     {
-        private readonly IBaseService<User> service;
+        private readonly IUserService service;
         private readonly IMapper mapper;
-        public UserController(IBaseService<User> _service, IMapper _mapper) { 
+        public UserController(IUserService _service, IMapper _mapper) { 
             service = _service;
             mapper = _mapper;
         }
@@ -33,18 +34,15 @@ namespace Food_Management_System.Controllers
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] UserDto userDto)
         {
-            var user = mapper.Map<User>(userDto);
-            var created = await service.Create(user);
-            var result = mapper.Map<UserDto>(created);
-            return CreatedAtAction(nameof(Get), new { id = created.Id }, result);
+            await service.Create(userDto);
+            return Ok();
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, [FromBody] User user)
+        public async Task<IActionResult> Update(int id, [FromBody] UserDto user)
         {
-            if (id != user.Id) return BadRequest();
-            await service.Update(user);
-            return NoContent();
+            await service.Update(id,user);
+            return Ok();
         }
 
         [HttpDelete("{id}")]

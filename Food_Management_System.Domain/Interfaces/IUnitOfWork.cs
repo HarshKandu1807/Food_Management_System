@@ -9,7 +9,11 @@ namespace Food_Management_System.Domain.Interfaces
 {
     public interface IUnitOfWork:IDisposable
     {
-        IRepository<T> Repository<T>() where T : BaseEntity;
+        IUserRepository UserRepository { get; }
+        IMenuRepository MenuRepository { get; }
+        IOrderRepository OrderRepository { get; }
+        IInventoryRepository InventoryRepository { get; }
+        IRecipeRepository RecipeRepository { get; }
         Task<int> SaveChangesAsync();
     }
 }

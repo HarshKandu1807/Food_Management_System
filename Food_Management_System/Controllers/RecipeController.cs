@@ -1,8 +1,7 @@
 ﻿using AutoMapper;
 using Food_Management_System.Application.DTOS;
-using Food_Management_System.Application.Services;
 using Food_Management_System.Application.Services.MenuService;
-using Food_Management_System.Domain.Entities;
+using Food_Management_System.Application.Services.RecipeService;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -10,48 +9,48 @@ namespace Food_Management_System.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class MenuController : ControllerBase
+    public class RecipeController : ControllerBase
     {
-        private readonly IMenuService menuService;
+        private readonly IRecipeService recipeService;
         private readonly IMapper mapper;
 
-        public MenuController(IMapper _mapper,IMenuService _menuService)
+        public RecipeController(IMapper _mapper, IRecipeService _recipeService)
         {
-            menuService = _menuService;
+            recipeService = _recipeService;
             mapper = _mapper;
         }
 
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            return Ok(await menuService.GetAll());
+            return Ok(await recipeService.GetAll());
         }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> Get(int id)
         {
-            var menu = await menuService.GetById(id);
+            var menu = await recipeService.GetById(id);
             return menu is null ? NotFound() : Ok(menu);
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] MenuDto menuDto)
+        public async Task<IActionResult> Create([FromBody] RecipeDto recipeDto)
         {
-            var created = await menuService.Create(menuDto);
+            var created = await recipeService.Create(recipeDto);
             return Ok(created);
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, [FromBody] MenuDto menuDto)
+        public async Task<IActionResult> Update(int id, [FromBody] RecipeDto recipeDto)
         {
-            await menuService.Update(id,menuDto);
+            await recipeService.Update(id, recipeDto);
             return Ok();
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
-            await menuService.Delete(id);
+            await recipeService.Delete(id);
             return Ok();
         }
     }

@@ -12,10 +12,12 @@ namespace Food_Management_System.Application.Mapping
     public class MappingProfile : Profile
     {
         public MappingProfile(){
-            CreateMap<User, UserDto>();
-            CreateMap<UserDto, User>();
-            CreateMap<Menu, MenuDto>();
-            CreateMap<MenuDto, Menu>();
+            CreateMap<User, UserDto>().ReverseMap();
+            CreateMap<Menu, MenuDto>().ReverseMap();
+            CreateMap<Order, OrderDto>().ReverseMap();
+            CreateMap<Inventory, InventoryDto>().ReverseMap();
+            CreateMap<Recipe, RecipeDto>().ReverseMap();
+
         }
     }
 }

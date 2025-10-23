@@ -14,7 +14,11 @@ namespace Food_Management_System.Infrastructure
         public static IServiceCollection AddInfrastructure(this IServiceCollection services)
         {
             services.AddScoped<IUnitOfWork, UnitOfWork>();
-            services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+            services.AddScoped<IUserRepository,UserRepository>();
+            services.AddScoped<IMenuRepository, MenuRepository>();
+            services.AddScoped<IInventoryRepository, InventoryRepository>();
+            services.AddScoped<IOrderRepository, OrderRepository>();
+            services.AddScoped<IRecipeRepository, RecipeRepository>();
             return services;
         }
     }
