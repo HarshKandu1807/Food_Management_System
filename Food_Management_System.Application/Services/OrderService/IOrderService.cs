@@ -12,8 +12,10 @@ namespace Food_Management_System.Application.Services.OrderService
     {
         Task<IEnumerable<Order>?> GetAll();
         Task<Order?> GetById(int id);
-        Task<bool> Create(OrderDto orderDto);
-        Task<bool?> Update(int id, OrderDto orderDto);
+        Task<Order?> Create(OrderDto orderDto);
+        Task<Order?> Update(int orderId, OrderDto updatedOrderDto);
         Task<bool?> Delete(int id);
+        Task<IEnumerable<Order>?> GetDailyOrderReport(DateTime date);
+        //Task SendDailyReportByEmail(DateTime date, string toEmail);
     }
 }

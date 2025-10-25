@@ -9,5 +9,7 @@ namespace Food_Management_System.Domain.Interfaces
 {
     public interface IOrderRepository:IRepository<Order>
     {
+        Task<Order?> GetOrderWithDetailsAsync(int orderId);
+        Task<IEnumerable<Order>?> GetDailyOrderReport(DateTime date);
     }
 }

@@ -8,8 +8,13 @@ namespace Food_Management_System.Domain.Entities
         public string Name { get; set; }
         public string Password { get; set; }
         public int ContactNo { get; set; }
-        public string Role { get; set; }
+        public UserRole Role { get; set; }
         [JsonIgnore]
         public ICollection<Order>? Orders { get; set; }
+    }
+    public enum UserRole
+    {
+        Admin,
+        Cashier 
     }
 }

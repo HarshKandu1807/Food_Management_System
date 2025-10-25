@@ -12,6 +12,6 @@ namespace Food_Management_System.Application.DTOS
     {
         public int MenuId { get; set; }
         public int ItemId { get; set; }
-        public int QuantityRequired { get; set; }
+        public double QuantityRequired { get; set; }
     }
 }

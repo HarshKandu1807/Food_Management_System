@@ -10,7 +10,7 @@ namespace Food_Management_System.Application.DTOS
     {
         public string ItemName { get; set; }
         public string Unit { get; set; }
-        public int QuantityAvailable { get; set; }
+        public double QuantityAvailable { get; set; }
         public int ReorderLevel { get; set; }
     }
 }

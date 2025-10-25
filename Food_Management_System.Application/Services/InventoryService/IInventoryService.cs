@@ -15,5 +15,6 @@ namespace Food_Management_System.Application.Services.InventoryService
         Task<bool> Create(InventoryDto inventoryDto);
         Task<bool?> Update(int id, InventoryDto inventoryDto);
         Task<bool?> Delete(int id);
+        Task<IEnumerable<Inventory>?> GetLowStockItems();
     }
 }

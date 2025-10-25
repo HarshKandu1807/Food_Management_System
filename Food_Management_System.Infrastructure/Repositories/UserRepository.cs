@@ -17,6 +17,9 @@ namespace Food_Management_System.Infrastructure.Repositories
         {
             dbContext = _dbContext;
         }
-
+        public async Task<User?> FindByContact(int contactNo)
+        {
+            return await dbContext.Users.FirstOrDefaultAsync(x=>x.ContactNo==contactNo);
+        }
     }
 }

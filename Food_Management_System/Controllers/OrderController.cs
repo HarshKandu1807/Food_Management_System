@@ -53,5 +53,10 @@ namespace Food_Management_System.Controllers
             await orderService.Delete(id);
             return Ok();
         }
+        [HttpGet("GetDailySalesReport")]
+        public async Task<IActionResult> GetDailySalesReport(DateTime date)
+        {
+            return Ok(await orderService.GetDailyOrderReport(date));
+        }
     }
 }

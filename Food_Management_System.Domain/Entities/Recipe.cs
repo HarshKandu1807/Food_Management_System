@@ -10,6 +10,6 @@ namespace Food_Management_System.Domain.Entities
         [ForeignKey(nameof(Inventory))]
         public int ItemId { get; set; }
         public Inventory? Inventory { get; set; }
-        public int QuantityRequired { get; set; }
+        public double QuantityRequired { get; set; }
     }
 }

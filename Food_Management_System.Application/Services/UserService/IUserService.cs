@@ -12,7 +12,8 @@ namespace Food_Management_System.Application.Services.UserService
     {
         Task<IEnumerable<User>?> GetAll();
         Task<User?> GetById(int id);
-        Task<bool> Create(UserDto userDto);
+        Task<string> Create(UserDto userDto);
+        Task<string> Login(LoginDto dto);
         Task<bool?> Update(int id,UserDto userDto);
         Task<bool?> Delete(int id);
     }

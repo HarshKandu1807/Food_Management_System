@@ -3,6 +3,7 @@ using Food_Management_System.Application.DTOS;
 using Food_Management_System.Application.Services.InventoryService;
 using Food_Management_System.Application.Services.MenuService;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Food_Management_System.Controllers
@@ -36,15 +37,13 @@ namespace Food_Management_System.Controllers
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] InventoryDto inventoryDto)
         {
-            var created = await inventoryService.Create(inventoryDto);
-            return Ok(created);
+            return Ok(await inventoryService.Create(inventoryDto));
         }
 
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, [FromBody] InventoryDto inventoryDto)
         {
-            await inventoryService.Update(id, inventoryDto);
-            return Ok();
+            return Ok(await inventoryService.Update(id, inventoryDto));
         }
 
         [HttpDelete("{id}")]
@@ -52,6 +51,12 @@ namespace Food_Management_System.Controllers
         {
             await inventoryService.Delete(id);
             return Ok();
+        }
+
+        [HttpGet("GetLowStockItems")]
+        public async Task<IActionResult> GetLowStockItem()
+        {
+            return Ok(await inventoryService.GetLowStockItems());
         }
     }
 }

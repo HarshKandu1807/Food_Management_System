@@ -9,5 +9,6 @@ namespace Food_Management_System.Domain.Interfaces
 {
     public interface IUserRepository:IRepository<User>
     {
+        Task<User?> FindByContact(int contactNo);
     }
 }

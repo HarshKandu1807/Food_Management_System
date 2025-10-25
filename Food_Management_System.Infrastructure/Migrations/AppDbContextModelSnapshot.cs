@@ -46,8 +46,8 @@ namespace Food_Management_System.Infrastructure.Migrations
                     b.Property<DateTime>("ModifiedDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("QuantityAvailable")
-                        .HasColumnType("int");
+                    b.Property<double>("QuantityAvailable")
+                        .HasColumnType("float");
 
                     b.Property<int>("ReorderLevel")
                         .HasColumnType("int");
@@ -85,8 +85,8 @@ namespace Food_Management_System.Infrastructure.Migrations
                     b.Property<DateTime>("ModifiedDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("Price")
-                        .HasColumnType("int");
+                    b.Property<double>("Price")
+                        .HasColumnType("float");
 
                     b.HasKey("Id");
 
@@ -123,7 +123,7 @@ namespace Food_Management_System.Infrastructure.Migrations
                     b.Property<double>("TotalAmount")
                         .HasColumnType("float");
 
-                    b.Property<int?>("UserId")
+                    b.Property<int>("UserId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
@@ -197,8 +197,8 @@ namespace Food_Management_System.Infrastructure.Migrations
                     b.Property<DateTime>("ModifiedDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("QuantityRequired")
-                        .HasColumnType("int");
+                    b.Property<double>("QuantityRequired")
+                        .HasColumnType("float");
 
                     b.HasKey("Id");
 
@@ -253,7 +253,9 @@ namespace Food_Management_System.Infrastructure.Migrations
                 {
                     b.HasOne("Food_Management_System.Domain.Entities.User", "User")
                         .WithMany("Orders")
-                        .HasForeignKey("UserId");
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("User");
                 });

@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Food_Management_System.Application.DTOS;
+using Food_Management_System.Application.Services.Helper;
 using Food_Management_System.Application.Services.MenuService;
 using Food_Management_System.Domain.Entities;
 using Food_Management_System.Domain.Interfaces;
@@ -15,10 +16,12 @@ namespace Food_Management_System.Application.Services.MenuService
     {
         private readonly IUnitOfWork unitOfWork;
         private readonly IMapper mapper;
-        public MenuService(IUnitOfWork _unitOfWork, IMapper _mapper)
+        private readonly IUserContext userContext;
+        public MenuService(IUnitOfWork _unitOfWork, IMapper _mapper,IUserContext _userContext)
         {
             unitOfWork = _unitOfWork;
             mapper = _mapper;
+            userContext = _userContext;
         }
         public async Task<IEnumerable<Menu>?> GetAll()
         {
@@ -33,6 +36,8 @@ namespace Food_Management_System.Application.Services.MenuService
             var menu = mapper.Map<Menu>(menuDto);
             menu.CreatedDate = DateTime.UtcNow;
             menu.ModifiedDate = DateTime.UtcNow;
+            menu.CreatedBy = userContext.UserId ?? 0;
+            menu.ModifiedBy = userContext.UserId ?? 0;
             await unitOfWork.MenuRepository.Add(menu);
             var changes = await unitOfWork.SaveChangesAsync();
             return changes > 0;
@@ -45,6 +50,7 @@ namespace Food_Management_System.Application.Services.MenuService
                 return null;
             }
             menu.ModifiedDate = DateTime.UtcNow;
+            menu.ModifiedBy = userContext.UserId ?? 0;
             mapper.Map(menuDto, menu);
             unitOfWork.MenuRepository.Update(menu);
             var changes = await unitOfWork.SaveChangesAsync();

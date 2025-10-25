@@ -20,5 +20,11 @@ namespace Food_Management_System.Infrastructure.Data
         public DbSet<OrderDetail> OrderDetails { get; set; }
         public DbSet<Menu> Menu { get; set; }
         public DbSet<Inventory> Inventory { get; set; }
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<User>()
+                .Property(u => u.Role)
+                .HasConversion<string>();  // 👈 Key line
+        }
     }
 }

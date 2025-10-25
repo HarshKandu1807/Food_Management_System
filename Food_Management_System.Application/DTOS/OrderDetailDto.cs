@@ -5,10 +5,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Food_Management_System.Domain.Interfaces
+namespace Food_Management_System.Application.DTOS
 {
-    public interface IMenuRepository:IRepository<Menu>
+    public class OrderDetailDto
     {
-        Task<Menu?> GetMenuWithRecipeAsync(int menuId);
+        public int MenuId { get; set; }
+        public int QuantityOrdered { get; set; }
     }
 }
