@@ -8,7 +8,6 @@ namespace Food_Management_System.Domain.Entities
         public string CustomerName { get; set; }
         public DateTime OrderDate { get; set; }
         public double TotalAmount { get; set; }
-        //[ForeignKey(nameof(User))]
         public int UserId { get; set; }
         public User? User { get; set; }
         [JsonIgnore]

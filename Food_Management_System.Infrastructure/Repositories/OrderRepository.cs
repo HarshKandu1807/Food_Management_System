@@ -24,7 +24,11 @@ namespace Food_Management_System.Infrastructure.Repositories
         }
         public async Task<IEnumerable<Order>?> GetDailyOrderReport(DateTime date)
         {
-            return await dbContext.Orders.Include(o=>o.OrderDetails).ThenInclude(m=>m.Menu).Where(d => d.OrderDate.Date == date.Date).ToListAsync();
+            var start = date.Date.ToUniversalTime();
+            var end = date.Date.AddDays(1).ToUniversalTime();
+            return await dbContext.Orders.Include(o=>o.OrderDetails).ThenInclude(m=>m.Menu)
+                .Where(o => o.OrderDate >= start && o.OrderDate < end).ToListAsync();
         }
+
     }
 }

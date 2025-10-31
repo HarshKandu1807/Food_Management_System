@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using OfficeOpenXml;
 using System.Text;
 using System.Text.Json;
 
@@ -93,6 +94,8 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 builder.Services.AddAuthorization();
+builder.Services.AddMemoryCache();
+ExcelPackage.License.SetNonCommercialOrganization("My Noncommercial organization");
 
 var app = builder.Build();
 

@@ -2,6 +2,8 @@
 using Food_Management_System.Application.DTOS;
 using Food_Management_System.Application.Services.MenuService;
 using Food_Management_System.Application.Services.OrderService;
+using Food_Management_System.Domain.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -58,5 +60,17 @@ namespace Food_Management_System.Controllers
         {
             return Ok(await orderService.GetDailyOrderReport(date));
         }
+        [HttpPost("report")]
+        public async Task<IActionResult> SendDailyReport(DateTime date, [FromQuery] string? email=null)
+        {
+            if (date == null)
+            {
+                date = DateTime.Now.Date;
+            }
+            var filebyte = await orderService.SendDailyReportByEmail(date, email);
+
+            return File(filebyte, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "DailySales.xlsx");
+        }
+
     }
 }

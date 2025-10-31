@@ -4,11 +4,17 @@ using Food_Management_System.Application.Services.Helper;
 using Food_Management_System.Domain.Entities;
 using Food_Management_System.Domain.Interfaces;
 using Food_Management_System.Infrastructure.Repositories;
+using MimeKit;
+using OfficeOpenXml;
+using OfficeOpenXml.Style;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
+using System.Drawing;
+
+//using System.ComponentModel;
 using System.Linq;
 using System.Net.Mail;
+using System.Reflection.Metadata.Ecma335;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -19,9 +25,9 @@ namespace Food_Management_System.Application.Services.OrderService
         private readonly IUnitOfWork unitOfWork;
         private readonly IMapper mapper;
         private readonly IUserContext userContext;
-        public OrderService(IUnitOfWork unitOfWork, IMapper _mapper, IUserContext _userContext)
+        public OrderService(IUnitOfWork _unitOfWork, IMapper _mapper, IUserContext _userContext)
         {
-            unitOfWork = unitOfWork;
+            unitOfWork = _unitOfWork;
             mapper = _mapper;
             userContext = _userContext;
         }
@@ -232,78 +238,146 @@ namespace Food_Management_System.Application.Services.OrderService
             return await unitOfWork.OrderRepository.GetDailyOrderReport(date);
         }
 
-        //public async Task SendDailyReportByEmail(DateTime date, string toEmail)
-        //{
-        //    // 1️⃣ Fetch all orders with details for the date
-        //    var orders = await unitOfWork.OrderRepository.GetDailyReportDetailsAsync(date);
-        //    if (!orders.Any())
-        //        throw new Exception($"No orders found for {date:yyyy-MM-dd}");
+        public async Task<byte[]> SendDailyReportByEmail(DateTime date, string? toEmail)
+        {
+            // 1️⃣ Fetch all orders with details for the date
+            var orders = await unitOfWork.OrderRepository.GetDailyOrderReport(date);
+            if (!orders.Any())
+                throw new Exception($"No orders found for {date:yyyy-MM-dd}");
+            var reportData = orders.Select(o => new DailyOrderReportDto
+            {
+                OrderId = o.Id,
+                CustomerName = o.CustomerName,
+                OrderDate = o.OrderDate.ToLocalTime(),
+                TotalAmount = o.TotalAmount,
+                OrderDetails = o.OrderDetails.Select(d => new DailyOrderDetailDto
+                {
+                    MenuName = d.Menu!.MenuName,
+                    QuantityOrdered = d.QuantityOrdered,
+                    UnitPrice = d.Menu.Price
+                }).ToList()
+            }).ToList();
 
-        //    // 2️⃣ Generate Excel
-        //    var excelBytes = GenerateExcelReport(orders);
+            // 2️⃣ Generate Excel
+            var excelBytes = GenerateExcelReport(reportData);
 
-        //    // 3️⃣ Send Email
-        //    await SendEmailWithAttachment(excelBytes, toEmail, date);
-        //}
+            // 3️⃣ Send Email
+            if (toEmail != null)
+            {
+                await SendEmailWithAttachment(excelBytes, toEmail, date);
+            }
+            return excelBytes;
+        }
 
-        //private byte[] GenerateExcelReport(IEnumerable<DailyOrderReportDto> report)
-        //{
-        //    ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+        private byte[] GenerateExcelReport(IEnumerable<DailyOrderReportDto> report)
+        {
+            using var package = new ExcelPackage();
+            var ws = package.Workbook.Worksheets.Add("DailySales");
 
-        //    using var package = new ExcelPackage();
-        //    var ws = package.Workbook.Worksheets.Add("DailySales");
+            ws.Cells[1, 1].Value = "Order ID";
+            ws.Cells[1, 2].Value = "Customer Name";
+            ws.Cells[1, 3].Value = "Order Date";
+            ws.Cells[1, 4].Value = "Menu Name";
+            ws.Cells[1, 5].Value = "Quantity Ordered";
+            ws.Cells[1, 6].Value = "Unit Price";
+            ws.Cells[1, 7].Value = "Line Total";
+            ws.Cells[1, 8].Value = "Order Total";
 
-        //    // Headers
-        //    ws.Cells[1, 1].Value = "Order ID";
-        //    ws.Cells[1, 2].Value = "Customer Name";
-        //    ws.Cells[1, 3].Value = "Order Date";
-        //    ws.Cells[1, 4].Value = "Menu Name";
-        //    ws.Cells[1, 5].Value = "Quantity Ordered";
-        //    ws.Cells[1, 6].Value = "Unit Price";
-        //    ws.Cells[1, 7].Value = "Line Total";
-        //    ws.Cells[1, 8].Value = "Order Total";
+            using (var range = ws.Cells[1, 1, 1, 8])
+            {
+                range.Style.Font.Bold = true;
+                range.Style.Font.Color.SetColor(Color.White);
+                range.Style.Fill.PatternType = ExcelFillStyle.Solid;
+                range.Style.Fill.BackgroundColor.SetColor(Color.RoyalBlue); 
+                range.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                range.Style.VerticalAlignment = ExcelVerticalAlignment.Center;
+                range.Style.Border.BorderAround(ExcelBorderStyle.Thin, Color.Black);
+            }
 
-        //    int row = 2;
-        //    foreach (var order in report)
-        //    {
-        //        foreach (var detail in order.OrderDetails)
-        //        {
-        //            ws.Cells[row, 1].Value = order.OrderId;
-        //            ws.Cells[row, 2].Value = order.CustomerName;
-        //            ws.Cells[row, 3].Value = order.OrderDate.ToString("yyyy-MM-dd HH:mm");
-        //            ws.Cells[row, 4].Value = detail.MenuName;
-        //            ws.Cells[row, 5].Value = detail.QuantityOrdered;
-        //            ws.Cells[row, 6].Value = detail.UnitPrice;
-        //            ws.Cells[row, 7].Value = detail.LineTotal;
-        //            ws.Cells[row, 8].Value = order.TotalAmount;
-        //            row++;
-        //        }
-        //    }
+            int row = 2;
+            double t = 0;
+            foreach (var order in report)
+            {
+                int startRow = row; 
 
-        //    ws.Cells[ws.Dimension.Address].AutoFitColumns();
-        //    return package.GetAsByteArray();
-        //}
+                foreach (var detail in order.OrderDetails)
+                {
+                    ws.Cells[row, 4].Value = detail.MenuName;
+                    ws.Cells[row, 4].Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
+                    ws.Cells[row, 5].Value = detail.QuantityOrdered;
+                    ws.Cells[row, 6].Value = detail.UnitPrice;
+                    ws.Cells[row, 7].Value = detail.LineTotal;
+                    row++;
+                }
 
-        //private async Task SendEmailWithAttachment(byte[] excelBytes, string toEmail, DateTime date)
-        //{
-        //    var message = new MimeMessage();
-        //    message.From.Add(MailboxAddress.Parse("yourcompany@example.com"));
-        //    message.To.Add(MailboxAddress.Parse(toEmail));
-        //    message.Subject = $"Daily Sales Report - {date:yyyy-MM-dd}";
+                int endRow = row - 1;
+                t += order.TotalAmount;
+                ws.Cells[startRow, 1,endRow,1].Merge = true;
+                ws.Cells[startRow, 1].Value = order.OrderId;
+                ws.Cells[startRow, 2, endRow, 2].Merge = true;
+                ws.Cells[startRow, 2].Value = order.CustomerName;
+                ws.Cells[startRow, 3, endRow, 3].Merge = true;
+                ws.Cells[startRow, 3].Value = order.OrderDate.ToString("yyy-MM-dd HH:mm");
+                ws.Cells[startRow, 8, endRow, 8].Merge = true;
+                ws.Cells[startRow, 8].Value = order.TotalAmount;
+                ws.Cells[startRow, 1].Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Center;
+                ws.Cells[startRow, 1].Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
+                ws.Cells[startRow, 2].Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Center;
+                ws.Cells[startRow, 2].Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
+                ws.Cells[startRow, 3].Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Center;
+                ws.Cells[startRow, 3].Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
+                ws.Cells[startRow, 8].Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Center;
+                ws.Cells[startRow, 8].Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
+            }
+            ws.Cells[row, 8].Value = $"Total={t}";
+            ws.Cells[row, 8].Style.Font.Bold = true;
+            ws.Cells[row, 8].Style.Font.Color.SetColor(Color.Black);
+            ws.Cells[row, 8].Style.Fill.PatternType = ExcelFillStyle.Solid;
+            ws.Cells[row, 8].Style.Fill.BackgroundColor.SetColor(Color.Yellow);
+            ws.Cells[row, 8].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+            ws.Cells[row, 8].Style.VerticalAlignment = ExcelVerticalAlignment.Center;
+            ws.Cells[row, 8].Style.Border.BorderAround(ExcelBorderStyle.Thin, Color.Black);
+            using (var range = ws.Cells[1, 1, row - 1, 8])
+            {
+                range.Style.Border.Top.Style = ExcelBorderStyle.Thin;
+                range.Style.Border.Left.Style = ExcelBorderStyle.Thin;
+                range.Style.Border.Right.Style = ExcelBorderStyle.Thin;
+                range.Style.Border.Bottom.Style = ExcelBorderStyle.Thin;
+                range.Style.Border.Top.Color.SetColor(Color.Black);
+                range.Style.Border.Left.Color.SetColor(Color.Black);
+                range.Style.Border.Right.Color.SetColor(Color.Black);
+                range.Style.Border.Bottom.Color.SetColor(Color.Black);
+            }
+            ws.Cells[ws.Dimension.Address].AutoFitColumns();
 
-        //    var builder = new BodyBuilder
-        //    {
-        //        TextBody = $"Please find attached the daily sales report for {date:yyyy-MM-dd}.",
-        //        Attachments = { ("DailySales.xlsx", excelBytes) }
-        //    };
+            return package.GetAsByteArray();
+        }
 
-        //    message.Body = builder.ToMessageBody();
 
-        //    using var client = new SmtpClient();
-        //    await client.ConnectAsync("smtp.yourserver.com", 587, false);
-        //    await client.AuthenticateAsync("username", "password");
-        //    await client.SendAsync(message);
-        //    await client.DisconnectAsync(true);
-        //}
+        private async Task SendEmailWithAttachment(byte[] excelBytes, string toEmail, DateTime date)
+        {
+            var message = new MimeMessage();
+            message.From.Add(MailboxAddress.Parse("harsh.kandu@nimapinfotech.com"));
+            message.To.Add(MailboxAddress.Parse(toEmail));
+            message.Subject = $"Daily Sales Report - {date:yyyy-MM-dd}";
+
+            var builder = new BodyBuilder
+            {
+                TextBody = $"Please find attached daily sales report for {date:yyyy-MM-dd}."
+            };
+            builder.Attachments.Add(
+                "DailySales.xlsx",
+                excelBytes,
+                new ContentType("application", "vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+            );
+            message.Body = builder.ToMessageBody();
+
+            using var smtp = new MailKit.Net.Smtp.SmtpClient();
+            await smtp.ConnectAsync("smtp.gmail.com", 587, MailKit.Security.SecureSocketOptions.StartTls);
+            await smtp.AuthenticateAsync("harsh.kandu@nimapinfotech.com", Encoding.UTF8.GetString(Convert.FromBase64String("ZmVna3RraHllanBydHJtbw==")));
+            await smtp.SendAsync(message);
+            await smtp.DisconnectAsync(true);
+        }
+
     }
 }

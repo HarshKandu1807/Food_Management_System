@@ -16,6 +16,6 @@ namespace Food_Management_System.Application.Services.OrderService
         Task<Order?> Update(int orderId, OrderDto updatedOrderDto);
         Task<bool?> Delete(int id);
         Task<IEnumerable<Order>?> GetDailyOrderReport(DateTime date);
-        //Task SendDailyReportByEmail(DateTime date, string toEmail);
+        Task<byte[]> SendDailyReportByEmail(DateTime date, string? toEmail);
     }
 }
