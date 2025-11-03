@@ -31,7 +31,7 @@ namespace Food_Management_System.Controllers
             return user is null ? NotFound() : Ok(user);
         }
 
-        [HttpPost]
+        [HttpPost("Register")]
         public async Task<IActionResult> Create([FromBody] UserDto userDto)
         {
             await service.Create(userDto);

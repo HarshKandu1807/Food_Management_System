@@ -1,5 +1,6 @@
 using Food_Management_System.Application.Mapping;
 using Food_Management_System.Application.Services;
+using Food_Management_System.Application.Services.EmailService;
 using Food_Management_System.Application.Services.Helper;
 using Food_Management_System.Application.Services.InventoryService;
 using Food_Management_System.Application.Services.MenuService;
@@ -41,6 +42,7 @@ builder.Services.AddScoped<IMenuService, MenuService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IInventoryService, InventoryService>();
 builder.Services.AddScoped<IRecipeService, RecipeService>();
+builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddAutoMapper(typeof(MappingProfile));
 
 var jwtSettings = builder.Configuration.GetSection("Jwt");

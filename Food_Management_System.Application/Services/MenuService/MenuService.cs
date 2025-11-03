@@ -36,6 +36,10 @@ namespace Food_Management_System.Application.Services.MenuService
                 return cachedMenus;
             }
             var menus= await unitOfWork.MenuRepository.GetAll();
+            if (menus == null)
+            {
+                return null;
+            }
             cache.Set(MenuCacheKey, menus, cacheDuration);
             return menus;
         }
@@ -46,7 +50,13 @@ namespace Food_Management_System.Application.Services.MenuService
                 return cachedMenu;
             var menu= await unitOfWork.MenuRepository.GetById(id);
             if (menu != null)
+            {
                 cache.Set(key, menu, cacheDuration);
+            }
+            else
+            {
+                return null;
+            }
             return menu;
         }
         public async Task<bool> Create(MenuDto menuDto)
@@ -56,6 +66,15 @@ namespace Food_Management_System.Application.Services.MenuService
             menu.ModifiedDate = DateTime.UtcNow;
             menu.CreatedBy = userContext.UserId ?? 0;
             menu.ModifiedBy = userContext.UserId ?? 0;
+            var exist=await unitOfWork.MenuRepository.GetMenuByName(menuDto.MenuName);
+            if (menuDto.Price <= 0)
+            {
+                return false;
+            }
+            if(exist != null)
+            {
+                return false;
+            }
             await unitOfWork.MenuRepository.Add(menu);
             var changes = await unitOfWork.SaveChangesAsync()>0;
             if (changes)
@@ -72,9 +91,13 @@ namespace Food_Management_System.Application.Services.MenuService
         public async Task<bool?> Update(int id, MenuDto menuDto)
         {
             var menu = await unitOfWork.MenuRepository.GetById(id);
+            if (menuDto.Price <= 0)
+            {
+                return false;
+            }
             if (menu == null)
             {
-                return null;
+                return false;
             }
             menu.ModifiedDate = DateTime.UtcNow;
             menu.ModifiedBy = userContext.UserId ?? 0;
@@ -94,7 +117,7 @@ namespace Food_Management_System.Application.Services.MenuService
             var menu = await unitOfWork.MenuRepository.GetById(id);
             if (menu == null)
             {
-                return null;
+                return false;
             }
             unitOfWork.MenuRepository.Remove(menu);
             var changes = await unitOfWork.SaveChangesAsync()>0;

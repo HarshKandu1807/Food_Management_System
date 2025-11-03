@@ -12,7 +12,7 @@ namespace Food_Management_System.Application.Services.InventoryService
     {
         Task<IEnumerable<Inventory>?> GetAll();
         Task<Inventory?> GetById(int id);
-        Task<bool> Create(InventoryDto inventoryDto);
+        Task<bool?> Create(InventoryDto inventoryDto);
         Task<bool?> Update(int id, InventoryDto inventoryDto);
         Task<bool?> Delete(int id);
         Task<IEnumerable<Inventory>?> GetLowStockItems();

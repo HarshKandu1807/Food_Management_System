@@ -21,5 +21,9 @@ namespace Food_Management_System.Infrastructure.Repositories
         {
             return await dbContext.Menu.Include(x => x.Recipes).ThenInclude(x => x.Inventory).FirstOrDefaultAsync(x => x.Id == menuId);
         }
+        public async Task<Menu?> GetMenuByName(string name)
+        {
+            return await dbContext.Menu.FirstOrDefaultAsync(x => x.MenuName == name);
+        }
     }
 }

@@ -10,5 +10,6 @@ namespace Food_Management_System.Domain.Interfaces
     public interface IMenuRepository:IRepository<Menu>
     {
         Task<Menu?> GetMenuWithRecipeAsync(int menuId);
+        Task<Menu?> GetMenuByName(string name);
     }
 }

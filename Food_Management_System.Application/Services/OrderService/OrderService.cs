@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Food_Management_System.Application.DTOS;
+using Food_Management_System.Application.Services.EmailService;
 using Food_Management_System.Application.Services.Helper;
 using Food_Management_System.Domain.Entities;
 using Food_Management_System.Domain.Interfaces;
@@ -10,8 +11,6 @@ using OfficeOpenXml.Style;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-
-//using System.ComponentModel;
 using System.Linq;
 using System.Net.Mail;
 using System.Reflection.Metadata.Ecma335;
@@ -25,11 +24,13 @@ namespace Food_Management_System.Application.Services.OrderService
         private readonly IUnitOfWork unitOfWork;
         private readonly IMapper mapper;
         private readonly IUserContext userContext;
-        public OrderService(IUnitOfWork _unitOfWork, IMapper _mapper, IUserContext _userContext)
+        private readonly IEmailService emailService;
+        public OrderService(IUnitOfWork _unitOfWork, IMapper _mapper, IUserContext _userContext, IEmailService _emailService)
         {
             unitOfWork = _unitOfWork;
             mapper = _mapper;
             userContext = _userContext;
+            emailService = _emailService;
         }
         public async Task<IEnumerable<Order>?> GetAll()
         {
@@ -39,19 +40,10 @@ namespace Food_Management_System.Application.Services.OrderService
         {
             return await unitOfWork.OrderRepository.GetById(id);
         }
-        //public async Task<bool> Create(OrderDto orderDto)
-        //{
-        //    var order = mapper.Map<Order>(orderDto);
-        //    order.CreatedDate = DateTime.UtcNow;
-        //    order.ModifiedDate = DateTime.UtcNow;
-        //    await unitOfWork.OrderRepository.Add(order);
-        //    var changes = await unitOfWork.SaveChangesAsync();
-        //    return changes > 0;
-        //}
-        public async Task<Order?> Create(OrderDto orderDto)
+        public async Task<bool?> Create(OrderDto orderDto)
         {
             if (orderDto.OrderDetails == null || !orderDto.OrderDetails.Any())
-                throw new ArgumentException("Order must contain at least one menu item.");
+                return false;
 
             double totalAmount = 0;
             var requiredItems = new Dictionary<int, double>();
@@ -73,7 +65,7 @@ namespace Food_Management_System.Application.Services.OrderService
             {
                 var menu = await unitOfWork.MenuRepository.GetMenuWithRecipeAsync(item.MenuId);
                 if (menu == null)
-                    throw new Exception($"Menu with ID {item.MenuId} not found.");
+                    return false;
 
                 totalAmount += menu.Price * item.QuantityOrdered;
 
@@ -104,7 +96,7 @@ namespace Food_Management_System.Application.Services.OrderService
             {
                 double needed = requiredItems[i.Id];
                 if (i.QuantityAvailable < needed)
-                    throw new Exception($"Insufficient stock for {i.ItemName}. Required: {needed}, Available: {i.QuantityAvailable}");
+                    return false;
 
                 i.QuantityAvailable -= needed;
                 i.ModifiedDate = DateTime.UtcNow;
@@ -116,29 +108,16 @@ namespace Food_Management_System.Application.Services.OrderService
 
             await unitOfWork.OrderRepository.Add(order);
 
-            await unitOfWork.SaveChangesAsync();
+            var changes=await unitOfWork.SaveChangesAsync()>0;
 
-            return order;
+            return changes;
         }
-        //public async Task<bool?> Update(int id, OrderDto orderDto)
-        //{
-        //    var order = await unitOfWork.OrderRepository.GetById(id);
-        //    if (order == null)
-        //    {
-        //        return null;
-        //    }
-        //    order.ModifiedDate = DateTime.UtcNow;
-        //    mapper.Map(orderDto, order);
-        //    unitOfWork.OrderRepository.Update(order);
-        //    var changes = await unitOfWork.SaveChangesAsync();
-        //    return changes > 0;
-        //}
 
-        public async Task<Order?> Update(int orderId, OrderDto updatedOrderDto)
+        public async Task<bool?> Update(int orderId, OrderDto updatedOrderDto)
         {
             var existingOrder = await unitOfWork.OrderRepository.GetOrderWithDetailsAsync(orderId);
             if (existingOrder == null)
-                throw new Exception($"Order with ID {orderId} not found.");
+                return false;
 
             foreach (var oldDetail in existingOrder.OrderDetails)
             {
@@ -161,7 +140,7 @@ namespace Food_Management_System.Application.Services.OrderService
             {
                 var menu = await unitOfWork.MenuRepository.GetMenuWithRecipeAsync(item.MenuId);
                 if (menu == null)
-                    throw new Exception($"Menu item with ID {item.MenuId} not found.");
+                    return false;
 
                 newTotal += menu.Price * item.QuantityOrdered;
 
@@ -189,7 +168,7 @@ namespace Food_Management_System.Application.Services.OrderService
             {
                 var inventory = await unitOfWork.InventoryRepository.GetById(kvp.Key);
                 if (inventory.QuantityAvailable < kvp.Value)
-                    throw new Exception($"Insufficient stock for {inventory.ItemName}. Need {kvp.Value}, Available {inventory.QuantityAvailable}");
+                    return false;
 
                 inventory.QuantityAvailable -= kvp.Value;
                 inventory.ModifiedDate = DateTime.UtcNow;
@@ -204,16 +183,16 @@ namespace Food_Management_System.Application.Services.OrderService
             existingOrder.ModifiedBy = userContext.UserId ?? 0;
 
             unitOfWork.OrderRepository.Update(existingOrder);
-            await unitOfWork.SaveChangesAsync();
+            var changes=await unitOfWork.SaveChangesAsync()>0;
 
-            return existingOrder;
+            return changes;
         }
         public async Task<bool?> Delete(int id)
         {
             var order = await unitOfWork.OrderRepository.GetOrderWithDetailsAsync(id);
             if (order == null)
             {
-                return null;
+                return false;
             }
             foreach(var o in order.OrderDetails)
             {
@@ -230,20 +209,18 @@ namespace Food_Management_System.Application.Services.OrderService
                 }
             }
             unitOfWork.OrderRepository.Remove(order);
-            var changes = await unitOfWork.SaveChangesAsync();
-            return changes > 0;
+            var changes = await unitOfWork.SaveChangesAsync() > 0;
+            return changes;
         }
         public async Task<IEnumerable<Order>?> GetDailyOrderReport(DateTime date)
         {
             return await unitOfWork.OrderRepository.GetDailyOrderReport(date);
         }
-
-        public async Task<byte[]> SendDailyReportByEmail(DateTime date, string? toEmail)
+        public async Task<byte[]?> SendDailyReportByEmail(DateTime date, string? toEmail)
         {
-            // 1️⃣ Fetch all orders with details for the date
             var orders = await unitOfWork.OrderRepository.GetDailyOrderReport(date);
             if (!orders.Any())
-                throw new Exception($"No orders found for {date:yyyy-MM-dd}");
+                return null;
             var reportData = orders.Select(o => new DailyOrderReportDto
             {
                 OrderId = o.Id,
@@ -258,13 +235,12 @@ namespace Food_Management_System.Application.Services.OrderService
                 }).ToList()
             }).ToList();
 
-            // 2️⃣ Generate Excel
             var excelBytes = GenerateExcelReport(reportData);
-
-            // 3️⃣ Send Email
+            var body = $"Please find attached daily sales report for {date:yyyy-MM-dd}.";
+            var subject = $"Daily Sales Report - {date:yyyy-MM-dd}";
             if (toEmail != null)
             {
-                await SendEmailWithAttachment(excelBytes, toEmail, date);
+                await emailService.SendEmail(toEmail,subject,body,excelBytes, "DailySales.xlsx", "vnd.openxmlformats-officedocument.spreadsheetml.sheet");
             }
             return excelBytes;
         }
@@ -351,32 +327,6 @@ namespace Food_Management_System.Application.Services.OrderService
             ws.Cells[ws.Dimension.Address].AutoFitColumns();
 
             return package.GetAsByteArray();
-        }
-
-
-        private async Task SendEmailWithAttachment(byte[] excelBytes, string toEmail, DateTime date)
-        {
-            var message = new MimeMessage();
-            message.From.Add(MailboxAddress.Parse("harsh.kandu@nimapinfotech.com"));
-            message.To.Add(MailboxAddress.Parse(toEmail));
-            message.Subject = $"Daily Sales Report - {date:yyyy-MM-dd}";
-
-            var builder = new BodyBuilder
-            {
-                TextBody = $"Please find attached daily sales report for {date:yyyy-MM-dd}."
-            };
-            builder.Attachments.Add(
-                "DailySales.xlsx",
-                excelBytes,
-                new ContentType("application", "vnd.openxmlformats-officedocument.spreadsheetml.sheet")
-            );
-            message.Body = builder.ToMessageBody();
-
-            using var smtp = new MailKit.Net.Smtp.SmtpClient();
-            await smtp.ConnectAsync("smtp.gmail.com", 587, MailKit.Security.SecureSocketOptions.StartTls);
-            await smtp.AuthenticateAsync("harsh.kandu@nimapinfotech.com", Encoding.UTF8.GetString(Convert.FromBase64String("ZmVna3RraHllanBydHJtbw==")));
-            await smtp.SendAsync(message);
-            await smtp.DisconnectAsync(true);
         }
 
     }
