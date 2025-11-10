@@ -22,9 +22,9 @@ namespace Food_Management_System.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> GetAll(int pageNumber, int pageSize)
         {
-            return Ok(await inventoryService.GetAll());
+            return Ok(await inventoryService.GetAll(pageNumber, pageSize));
         }
 
         [HttpGet("{id}")]

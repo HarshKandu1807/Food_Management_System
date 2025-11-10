@@ -5,6 +5,7 @@ using Food_Management_System.Application.Services.Helper;
 using Food_Management_System.Domain.Entities;
 using Food_Management_System.Domain.Interfaces;
 using Food_Management_System.Infrastructure.Repositories;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -26,9 +27,9 @@ namespace Food_Management_System.Application.Services.InventoryService
             userContext = _userContext;
             emailService = _emailService;
         }
-        public async Task<IEnumerable<Inventory>?> GetAll()
+        public async Task<Pagination<Inventory>?> GetAll(int pageNumber, int pageSize)
         {
-            var items= await unitOfWork.InventoryRepository.GetAll();
+            var items= await unitOfWork.InventoryRepository.GetAll(pageNumber, pageSize);
             if (items == null)
             {
                 return null;

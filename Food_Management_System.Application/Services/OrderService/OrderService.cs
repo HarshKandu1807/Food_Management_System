@@ -32,9 +32,9 @@ namespace Food_Management_System.Application.Services.OrderService
             userContext = _userContext;
             emailService = _emailService;
         }
-        public async Task<IEnumerable<Order>?> GetAll()
+        public async Task<Pagination<Order>?> GetAll(int pageNumber, int pageSize)
         {
-            return await unitOfWork.OrderRepository.GetAll();
+            return await unitOfWork.OrderRepository.GetAll(pageNumber, pageSize);
         }
         public async Task<Order?> GetById(int id)
         {

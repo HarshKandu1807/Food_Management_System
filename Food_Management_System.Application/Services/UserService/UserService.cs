@@ -29,23 +29,14 @@ namespace Food_Management_System.Application.Services.UserService
             configuration = _configuration;
             userContext = _userContext;
         }
-        public async Task<IEnumerable<User>?> GetAll()
+        public async Task<Pagination<User>?> GetAll(int pageNumber, int pageSize)
         {
-            return await unitOfWork.UserRepository.GetAll();
+            return await unitOfWork.UserRepository.GetAll(pageNumber, pageSize);
         }
         public async Task<User?> GetById(int id)
         {
             return await unitOfWork.UserRepository.GetById(id);
         }
-        //public async Task<bool> Create(UserDto userDto)
-        //{
-        //    var user = mapper.Map<User>(userDto);
-        //    user.CreatedDate = DateTime.UtcNow;
-        //    user.ModifiedDate = DateTime.UtcNow;
-        //    await unitOfWork.UserRepository.Add(user);
-        //    var changes = await unitOfWork.SaveChangesAsync();
-        //    return changes > 0;
-        //}
         public async Task<string> Create(UserDto dto)
         {
             var existingUser = await unitOfWork.UserRepository.FindByContact(dto.ContactNo);
@@ -78,7 +69,6 @@ namespace Food_Management_System.Application.Services.UserService
             if (user == null || !BCrypt.Net.BCrypt.Verify(dto.Password, user.Password))
                 throw new Exception("Invalid username or password.");
 
-            // Generate JWT token
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.UTF8.GetBytes(configuration["Jwt:Key"]);
 

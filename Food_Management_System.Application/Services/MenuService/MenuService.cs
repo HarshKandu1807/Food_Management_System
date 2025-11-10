@@ -21,7 +21,6 @@ namespace Food_Management_System.Application.Services.MenuService
         private readonly IMemoryCache cache;
         private readonly TimeSpan cacheDuration = TimeSpan.FromMinutes(10);
         private readonly IUserContext userContext;
-        private const string MenuCacheKey = "Menu";
         public MenuService(IUnitOfWork _unitOfWork, IMapper _mapper,IUserContext _userContext,IMemoryCache _cache)
         {
             unitOfWork = _unitOfWork;
@@ -29,23 +28,28 @@ namespace Food_Management_System.Application.Services.MenuService
             userContext = _userContext;
             cache = _cache;
         }
-        public async Task<IEnumerable<Menu>?> GetAll()
+        public async Task<Pagination<Menu>?> GetAll(int pageNumber, int pageSize)
         {
-            if (cache.TryGetValue(MenuCacheKey, out IEnumerable<Menu?> cachedMenus))
+            var MenuKey = $"Menu{pageNumber}_{pageSize}";
+            Console.WriteLine(DateTime.Now);
+            if (cache.TryGetValue(MenuKey, out Pagination<Menu?> cachedMenus))
             {
+                Console.WriteLine(DateTime.Now);
                 return cachedMenus;
             }
-            var menus= await unitOfWork.MenuRepository.GetAll();
+            Console.WriteLine(DateTime.Now);
+            var menus = await unitOfWork.MenuRepository.GetAll(pageNumber, pageSize);
             if (menus == null)
             {
                 return null;
             }
-            cache.Set(MenuCacheKey, menus, cacheDuration);
+            cache.Set(MenuKey, menus, cacheDuration);
+            Console.WriteLine(DateTime.Now);
             return menus;
         }
         public async Task<Menu?> GetById(int id)
         {
-            string key = $"{MenuCacheKey}_{id}";
+            string key = $"Menu_{id}";
             if (cache.TryGetValue(key, out Menu? cachedMenu))
                 return cachedMenu;
             var menu= await unitOfWork.MenuRepository.GetById(id);
@@ -77,15 +81,6 @@ namespace Food_Management_System.Application.Services.MenuService
             }
             await unitOfWork.MenuRepository.Add(menu);
             var changes = await unitOfWork.SaveChangesAsync()>0;
-            if (changes)
-            {
-                cache.Remove(MenuCacheKey);
-                var cacheOptions = new MemoryCacheEntryOptions
-                {
-                    AbsoluteExpirationRelativeToNow = cacheDuration
-                };
-                cache.Set($"{MenuCacheKey}_{menu.Id}", menu, cacheOptions);
-            }
             return changes;
         }
         public async Task<bool?> Update(int id, MenuDto menuDto)
@@ -106,9 +101,7 @@ namespace Food_Management_System.Application.Services.MenuService
             var changes = await unitOfWork.SaveChangesAsync()>0;
             if (changes)
             {
-                cache.Remove(MenuCacheKey);
-                cache.Remove($"{MenuCacheKey}_{id}");
-                cache.Set($"{MenuCacheKey}_{id}", menu, cacheDuration);
+                cache.Remove($"Menu_{id}");
             }
             return changes;
         }
@@ -123,8 +116,7 @@ namespace Food_Management_System.Application.Services.MenuService
             var changes = await unitOfWork.SaveChangesAsync()>0;
             if (changes)
             {
-                cache.Remove(MenuCacheKey);
-                cache.Remove($"{MenuCacheKey}_{id}");
+                cache.Remove($"Menu_{id}");
             }
             return changes;
         }

@@ -19,13 +19,7 @@ namespace Food_Management_System.Application.Services.EmailService
             _config = config;
         }
 
-        public async Task SendEmail(
-            string toEmail,
-            string subject,
-            string body,
-            byte[]? attachmentBytes = null,
-            string? attachmentName = null,
-            string? contentType = null)
+        public async Task SendEmail(string toEmail,string subject,string body,byte[]? attachmentBytes = null,string? attachmentName = null,string? contentType = null)
         {
             var fromEmail = _config["EmailSettings:FromEmail"];
             var encodedPassword = _config["EmailSettings:Password"];

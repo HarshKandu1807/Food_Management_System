@@ -10,7 +10,7 @@ namespace Food_Management_System.Domain.Interfaces
 {
     public interface IRepository<T> where T:BaseEntity
     {
-        Task<IEnumerable<T>?> GetAll();
+        Task<Pagination<T>?> GetAll(int pageNumber, int pageSize);
         Task<T?> GetById(int id);
         Task Add(T entity);
         void Update(T entity);

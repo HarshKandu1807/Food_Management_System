@@ -10,7 +10,7 @@ namespace Food_Management_System.Application.Services.UserService
 {
     public interface IUserService
     {
-        Task<IEnumerable<User>?> GetAll();
+        Task<Pagination<User>?> GetAll(int pageNumber, int pageSize);
         Task<User?> GetById(int id);
         Task<string> Create(UserDto userDto);
         Task<string> Login(LoginDto dto);

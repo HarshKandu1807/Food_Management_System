@@ -10,7 +10,7 @@ namespace Food_Management_System.Application.Services.InventoryService
 {
     public interface IInventoryService
     {
-        Task<IEnumerable<Inventory>?> GetAll();
+        Task<Pagination<Inventory>?> GetAll(int pageNumber, int pageSize);
         Task<Inventory?> GetById(int id);
         Task<bool?> Create(InventoryDto inventoryDto);
         Task<bool?> Update(int id, InventoryDto inventoryDto);

@@ -1,6 +1,7 @@
 ﻿using Food_Management_System.Domain.Entities;
 using Food_Management_System.Domain.Interfaces;
 using Food_Management_System.Infrastructure.Data;
+using Food_Management_System.Infrastructure.Extentions;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -19,9 +20,9 @@ namespace Food_Management_System.Infrastructure.Repositories
             context = _context;
             dbset = context.Set<T>();
         }
-        public async Task<IEnumerable<T>?> GetAll()
+        public async Task<Pagination<T>?> GetAll(int pageNumber, int pageSize)
         {
-            return await dbset.ToListAsync();
+            return await dbset.AsNoTracking().ToPagedResultAsync(pageNumber, pageSize);
         }
         public async Task<T?> GetById(int id)
         {

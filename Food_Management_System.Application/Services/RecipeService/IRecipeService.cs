@@ -10,7 +10,7 @@ namespace Food_Management_System.Application.Services.RecipeService
 {
     public interface IRecipeService
     {
-        Task<IEnumerable<Recipe>?> GetAll();
+        Task<Pagination<Recipe>?> GetAll(int pageNumber, int pageSize);
         Task<Recipe?> GetById(int id);
         Task<bool> Create(RecipeDto recipeDto);
         Task<bool?> Update(int id, RecipeDto recipeDto);

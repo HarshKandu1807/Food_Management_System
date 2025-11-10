@@ -2,6 +2,7 @@
 using Food_Management_System.Application.DTOS;
 using Food_Management_System.Application.Services.MenuService;
 using Food_Management_System.Application.Services.RecipeService;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -21,9 +22,9 @@ namespace Food_Management_System.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> GetAll(int pageNumber, int pageSize)
         {
-            return Ok(await recipeService.GetAll());
+            return Ok(await recipeService.GetAll(pageNumber, pageSize));
         }
 
         [HttpGet("{id}")]

@@ -10,7 +10,7 @@ namespace Food_Management_System.Application.Services.MenuService
 {
     public interface IMenuService
     {
-        Task<IEnumerable<Menu>?> GetAll();
+        Task<Pagination<Menu>?> GetAll(int pageNumber, int pageSize);
         Task<Menu?> GetById(int id);
         Task<bool> Create(MenuDto menuDto);
         Task<bool?> Update(int id, MenuDto menuDto);

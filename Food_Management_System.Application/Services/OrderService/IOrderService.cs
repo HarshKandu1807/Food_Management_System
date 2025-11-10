@@ -10,7 +10,7 @@ namespace Food_Management_System.Application.Services.OrderService
 {
     public interface IOrderService
     {
-        Task<IEnumerable<Order>?> GetAll();
+        Task<Pagination<Order>?> GetAll(int pageNumber, int pageSize);
         Task<Order?> GetById(int id);
         Task<bool?> Create(OrderDto orderDto);
         Task<bool?> Update(int orderId, OrderDto updatedOrderDto);

@@ -22,9 +22,9 @@ namespace Food_Management_System.Application.Services.RecipeService
             mapper = _mapper;
             userContext = _userContext;
         }
-        public async Task<IEnumerable<Recipe>?> GetAll()
+        public async Task<Pagination<Recipe>?> GetAll(int pageNumber, int pageSize)
         {
-            return await unitOfWork.RecipeRepository.GetAll();
+            return await unitOfWork.RecipeRepository.GetAll(pageNumber, pageSize);
         }
         public async Task<Recipe?> GetById(int id)
         {
