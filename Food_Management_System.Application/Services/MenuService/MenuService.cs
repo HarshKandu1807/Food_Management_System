@@ -30,14 +30,22 @@ namespace Food_Management_System.Application.Services.MenuService
         }
         public async Task<Pagination<Menu>?> GetAll(int pageNumber, int pageSize)
         {
+            if (pageNumber <= 0 || pageSize <= 0)
+            {
+                var allItems = await unitOfWork.MenuRepository.GetAll();
+                return new Pagination<Menu>
+                {
+                    Items = allItems,
+                    PageNumber = 1,
+                    PageSize = allItems.Count,
+                    TotalCount = allItems.Count
+                };
+            }
             var MenuKey = $"Menu{pageNumber}_{pageSize}";
-            Console.WriteLine(DateTime.Now);
             if (cache.TryGetValue(MenuKey, out Pagination<Menu?> cachedMenus))
             {
-                Console.WriteLine(DateTime.Now);
                 return cachedMenus;
             }
-            Console.WriteLine(DateTime.Now);
             var menus = await unitOfWork.MenuRepository.GetAll(pageNumber, pageSize);
             if (menus == null)
             {

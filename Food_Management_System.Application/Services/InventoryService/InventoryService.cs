@@ -29,6 +29,17 @@ namespace Food_Management_System.Application.Services.InventoryService
         }
         public async Task<Pagination<Inventory>?> GetAll(int pageNumber, int pageSize)
         {
+            if(pageNumber<=0 || pageSize <= 0)
+            {
+                var allItems=await unitOfWork.InventoryRepository.GetAll();
+                return new Pagination<Inventory>
+                {
+                    Items = allItems,
+                    PageNumber = 1,
+                    PageSize = allItems.Count,
+                    TotalCount = allItems.Count
+                };
+            }
             var items= await unitOfWork.InventoryRepository.GetAll(pageNumber, pageSize);
             if (items == null)
             {

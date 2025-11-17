@@ -1,5 +1,6 @@
 using Food_Management_System.Application.Mapping;
 using Food_Management_System.Application.Services;
+using Food_Management_System.Application.Services.AuthenticationService;
 using Food_Management_System.Application.Services.EmailService;
 using Food_Management_System.Application.Services.Helper;
 using Food_Management_System.Application.Services.InventoryService;
@@ -36,6 +37,7 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddInfrastructure();
 builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 builder.Services.AddScoped<IUserContext, UserContext>();
 builder.Services.AddScoped<IUserService,UserService>();
 builder.Services.AddScoped<IMenuService, MenuService>();

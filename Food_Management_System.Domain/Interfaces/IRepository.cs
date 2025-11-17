@@ -8,8 +8,9 @@ using System.Threading.Tasks;
 
 namespace Food_Management_System.Domain.Interfaces
 {
-    public interface IRepository<T> where T:BaseEntity
+    public interface IRepository<T> where T:class
     {
+        Task<List<T>?> GetAll();
         Task<Pagination<T>?> GetAll(int pageNumber, int pageSize);
         Task<T?> GetById(int id);
         Task Add(T entity);

@@ -34,6 +34,17 @@ namespace Food_Management_System.Application.Services.OrderService
         }
         public async Task<Pagination<Order>?> GetAll(int pageNumber, int pageSize)
         {
+            if (pageNumber <= 0 || pageSize <= 0)
+            {
+                var allItems = await unitOfWork.OrderRepository.GetAll();
+                return new Pagination<Order>
+                {
+                    Items = allItems,
+                    PageNumber = 1,
+                    PageSize = allItems.Count,
+                    TotalCount = allItems.Count
+                };
+            }
             return await unitOfWork.OrderRepository.GetAll(pageNumber, pageSize);
         }
         public async Task<Order?> GetById(int id)

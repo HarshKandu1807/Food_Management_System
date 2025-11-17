@@ -3,11 +3,13 @@ using Food_Management_System.Application.DTOS;
 using Food_Management_System.Application.Services;
 using Food_Management_System.Application.Services.MenuService;
 using Food_Management_System.Domain.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Food_Management_System.Controllers
 {
+    [Authorize(Roles ="Admin")]
     [Route("api/[controller]")]
     [ApiController]
     public class MenuController : ControllerBase

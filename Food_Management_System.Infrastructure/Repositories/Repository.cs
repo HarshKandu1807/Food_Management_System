@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace Food_Management_System.Infrastructure.Repositories
 {
-    public class Repository<T>:IRepository<T> where T:BaseEntity
+    public class Repository<T>:IRepository<T> where T:class
     {
         private readonly AppDbContext context;
         private readonly DbSet<T> dbset;
@@ -19,6 +19,10 @@ namespace Food_Management_System.Infrastructure.Repositories
         {
             context = _context;
             dbset = context.Set<T>();
+        }
+        public async Task<List<T>?> GetAll()
+        {
+            return await dbset.AsNoTracking().ToListAsync();
         }
         public async Task<Pagination<T>?> GetAll(int pageNumber, int pageSize)
         {

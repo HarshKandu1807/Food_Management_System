@@ -20,6 +20,7 @@ namespace Food_Management_System.Infrastructure.Data
         public DbSet<OrderDetail> OrderDetails { get; set; }
         public DbSet<Menu> Menu { get; set; }
         public DbSet<Inventory> Inventory { get; set; }
+        public DbSet<RefreshToken> RefreshTokens { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<User>()

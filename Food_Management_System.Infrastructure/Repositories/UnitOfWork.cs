@@ -19,8 +19,9 @@ namespace Food_Management_System.Infrastructure.Repositories
         public IOrderRepository OrderRepository { get; }
         public IInventoryRepository InventoryRepository { get; }
         public IRecipeRepository RecipeRepository { get; }
-        public UnitOfWork(AppDbContext _context, IUserRepository _UserRepository,IMenuRepository _MenuRepository, 
-            IOrderRepository _OrderRepository, IInventoryRepository _InventoryRepository, IRecipeRepository _RecipeRepository)
+        public IRefreshTokenRepository RefreshTokenRepository { get; }
+        public UnitOfWork(AppDbContext _context, IUserRepository _UserRepository,IMenuRepository _MenuRepository, IOrderRepository _OrderRepository, 
+            IInventoryRepository _InventoryRepository, IRecipeRepository _RecipeRepository, IRefreshTokenRepository _RefreshTokenRepository)
         {
             context = _context;
             UserRepository = _UserRepository;
@@ -28,6 +29,7 @@ namespace Food_Management_System.Infrastructure.Repositories
             OrderRepository = _OrderRepository;
             InventoryRepository = _InventoryRepository;
             RecipeRepository = _RecipeRepository;
+            RefreshTokenRepository = _RefreshTokenRepository;
         }
         public async Task<int> SaveChangesAsync()
         {

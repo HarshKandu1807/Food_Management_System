@@ -24,6 +24,17 @@ namespace Food_Management_System.Application.Services.RecipeService
         }
         public async Task<Pagination<Recipe>?> GetAll(int pageNumber, int pageSize)
         {
+            if (pageNumber <= 0 || pageSize <= 0)
+            {
+                var allItems = await unitOfWork.RecipeRepository.GetAll();
+                return new Pagination<Recipe>
+                {
+                    Items = allItems,
+                    PageNumber = 1,
+                    PageSize = allItems.Count,
+                    TotalCount = allItems.Count
+                };
+            }
             return await unitOfWork.RecipeRepository.GetAll(pageNumber, pageSize);
         }
         public async Task<Recipe?> GetById(int id)

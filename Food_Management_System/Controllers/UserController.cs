@@ -38,12 +38,6 @@ namespace Food_Management_System.Controllers
             return Ok();
         }
 
-        [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] LoginDto dto)
-        {
-            var token = await service.Login(dto);
-            return Ok(new { token });
-        }
 
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, [FromBody] UserDto user)

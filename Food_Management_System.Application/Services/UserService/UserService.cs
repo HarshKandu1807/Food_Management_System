@@ -31,6 +31,17 @@ namespace Food_Management_System.Application.Services.UserService
         }
         public async Task<Pagination<User>?> GetAll(int pageNumber, int pageSize)
         {
+            if (pageNumber <= 0 || pageSize <= 0)
+            {
+                var allItems = await unitOfWork.UserRepository.GetAll();
+                return new Pagination<User>
+                {
+                    Items = allItems,
+                    PageNumber = 1,
+                    PageSize = allItems.Count,
+                    TotalCount = allItems.Count
+                };
+            }
             return await unitOfWork.UserRepository.GetAll(pageNumber, pageSize);
         }
         public async Task<User?> GetById(int id)
@@ -60,38 +71,6 @@ namespace Food_Management_System.Application.Services.UserService
             await unitOfWork.SaveChangesAsync();
 
             return "User registered successfully.";
-        }
-
-        public async Task<string> Login(LoginDto dto)
-        {
-            var user = await unitOfWork.UserRepository.FindByContact(dto.ContactNo);
-
-            if (user == null || !BCrypt.Net.BCrypt.Verify(dto.Password, user.Password))
-                throw new Exception("Invalid username or password.");
-
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.UTF8.GetBytes(configuration["Jwt:Key"]);
-
-            var claims = new List<Claim>
-            {
-                new Claim(ClaimTypes.NameIdentifier,user.Id.ToString()),
-                new Claim(ClaimTypes.Name, user.Name),
-                new Claim(ClaimTypes.Role, user.Role.ToString())
-            };
-
-            var creds = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256);
-
-            var tokenDescriptor = new SecurityTokenDescriptor
-            {
-                Subject = new ClaimsIdentity(claims),
-                Expires = DateTime.UtcNow.AddHours(2),
-                SigningCredentials = creds,
-                Issuer = configuration["Jwt:Issuer"],
-                Audience = configuration["Jwt:Audience"]
-            };
-
-            var token = tokenHandler.CreateToken(tokenDescriptor);
-            return tokenHandler.WriteToken(token);
         }
         public async Task<bool?> Update(int id,UserDto userDto)
         {

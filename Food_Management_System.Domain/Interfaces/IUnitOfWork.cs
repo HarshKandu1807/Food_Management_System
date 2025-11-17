@@ -14,6 +14,7 @@ namespace Food_Management_System.Domain.Interfaces
         IOrderRepository OrderRepository { get; }
         IInventoryRepository InventoryRepository { get; }
         IRecipeRepository RecipeRepository { get; }
+        IRefreshTokenRepository RefreshTokenRepository { get; }
         Task<int> SaveChangesAsync();
     }
 }
